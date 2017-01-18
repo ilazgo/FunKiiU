@@ -15,6 +15,7 @@ import os
 import re
 import sys
 import zlib
+import tempfile
 
 try:
     from urllib.request import urlopen
@@ -63,8 +64,9 @@ parser.add_argument('-simulate', action='store_true', default=False, dest='simul
 parser.add_argument('-ticketsonly', action='store_true', default=False, dest='tickets_only',
                     help="Only download/generate tickets (and TMD and CERT), don't download any content")
 parser.add_argument('-keysite', action='store', dest='keysite',
-                    help="Specify *thekeysite* to obtain keys from")
-
+                    help="Specify *thekeysite* to obtain keys from, instead of using config.json into current directory")
+parser.add_argument('-temptitlekeys', action='store_true', default=False, dest='temptitlekeys',
+                    help="Don't save titlekeys.json file")
 
 def bytes2human(n, f='%(value).2f %(symbol)s', symbols='customary'):
     n = int(n)
@@ -331,7 +333,7 @@ def process_title_id(title_id, title_key, name=None, region=None, output_dir=Non
 
 
 def main(titles=None, keys=None, onlinekeys=False, onlinetickets=False, download_regions=False, output_dir=None,
-         retry_count=3, patch_demo=True, patch_dlc=True, simulate=False, tickets_only=False, keysite=''):
+         retry_count=3, patch_demo=True, patch_dlc=True, simulate=False, tickets_only=False, keysite='', temptitlekeys=False):
     print(keysite)
     print('*******\nFunKiiU {} by cearp and the cerea1killer\n*******\n'.format(__VERSION__))
     titlekeys_data = []
@@ -355,13 +357,19 @@ def main(titles=None, keys=None, onlinekeys=False, onlinetickets=False, download
 
         print(u'Downloading/updating data from {0}'.format(keysite))
 
-        if not download_file('https://{0}/json'.format(keysite), 'titlekeys.json', retry_count):
+        if temptitlekeys:
+            tmp_file=tempfile.NamedTemporaryFile()
+            file=tmp_file.name
+        else:
+            file='titlekeys.json'
+        
+        if not download_file('https://{0}/json'.format(keysite), file, retry_count):
             print('ERROR: Could not download data file... Exiting.\n')
             sys.exit(1)
 
         print('Downloaded data OK!')
 
-        with open('titlekeys.json') as data_file:
+        with open(file) as data_file:
             titlekeys_data = json.load(data_file)
 
     for title_id in titles:
@@ -445,4 +453,5 @@ if __name__ == '__main__':
          patch_dlc=arguments.patch_dlc,
          simulate=arguments.simulate,
          tickets_only=arguments.tickets_only,
-         keysite=arguments.keysite)
+         keysite=arguments.keysite,
+         temptitlekeys=arguments.temptitlekeys)
