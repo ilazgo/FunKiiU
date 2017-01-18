@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-#  FunKiiU 2.2
+#  FunKiiU 2.2.1
 
 from __future__ import unicode_literals, print_function
 
-__VERSION__ = 2.2
+__VERSION__ = "2.2.1"
 
 import argparse
 import base64
@@ -62,6 +62,8 @@ parser.add_argument('-simulate', action='store_true', default=False, dest='simul
                     help="Don't download anything, just do like you would.")
 parser.add_argument('-ticketsonly', action='store_true', default=False, dest='tickets_only',
                     help="Only download/generate tickets (and TMD and CERT), don't download any content")
+parser.add_argument('-keysite', action='store', dest='keysite',
+                    help="Specify *thekeysite* to obtain keys from")
 
 
 def bytes2human(n, f='%(value).2f %(symbol)s', symbols='customary'):
@@ -329,7 +331,8 @@ def process_title_id(title_id, title_key, name=None, region=None, output_dir=Non
 
 
 def main(titles=None, keys=None, onlinekeys=False, onlinetickets=False, download_regions=False, output_dir=None,
-         retry_count=3, patch_demo=True, patch_dlc=True, simulate=False, tickets_only=False):
+         retry_count=3, patch_demo=True, patch_dlc=True, simulate=False, tickets_only=False, keysite=''):
+    print(keysite)
     print('*******\nFunKiiU {} by cearp and the cerea1killer\n*******\n'.format(__VERSION__))
     titlekeys_data = []
 
@@ -348,7 +351,7 @@ def main(titles=None, keys=None, onlinekeys=False, onlinetickets=False, download
 
 
     if download_regions or onlinekeys or onlinetickets:
-        keysite = get_keysite()
+        keysite = keysite or get_keysite()
 
         print(u'Downloading/updating data from {0}'.format(keysite))
 
@@ -441,4 +444,5 @@ if __name__ == '__main__':
          patch_demo=arguments.patch_demo,
          patch_dlc=arguments.patch_dlc,
          simulate=arguments.simulate,
-         tickets_only=arguments.tickets_only)
+         tickets_only=arguments.tickets_only,
+         keysite=arguments.keysite)
